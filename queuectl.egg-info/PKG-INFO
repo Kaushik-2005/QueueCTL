@@ -1,3 +1,36 @@
+Metadata-Version: 2.4
+Name: queuectl
+Version: 1.0.0
+Summary: CLI Background Job Queue System
+Home-page: https://github.com/Kaushik-2005/QueueCTL
+Author: Kaushik
+Author-email: QueueCTL Team <queuectl@example.com>
+License: MIT
+Project-URL: Homepage, https://github.com/Kaushik-2005/QueueCTL
+Project-URL: Repository, https://github.com/Kaushik-2005/QueueCTL.git
+Project-URL: Issues, https://github.com/Kaushik-2005/QueueCTL/issues
+Keywords: queue,job,worker,cli,background,task
+Classifier: Development Status :: 4 - Beta
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: System :: Systems Administration
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: typer>=0.9.0
+Requires-Dist: rich>=13.0.0
+Requires-Dist: click>=8.0.0
+Dynamic: author
+Dynamic: home-page
+Dynamic: requires-python
+
 # QueueCTL - CLI Background Job Queue System
 
 [![Python](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
@@ -31,20 +64,32 @@ git clone https://github.com/Kaushik-2005/QueueCTL.git
 cd QueueCTL
 ```
 
-### Step 2: Install the Package
+### Step 2: Install Dependencies
 
 ```bash
-# Install QueueCTL and its dependencies
-pip install -e .
+# Install required Python packages
+pip install -r requirements.txt
 ```
 
-This will install QueueCTL as a package and make the `queuectl` command available globally.
+**Note**: Due to a naming conflict with Python's built-in `queue` module, we don't use `pip install -e .` for this project.
 
-### Step 3: Verify Installation
+### Step 3: Set Environment (Required)
+
+**For Windows PowerShell:**
+```powershell
+$env:PYTHONPATH = "."
+```
+
+**For Linux/Mac/WSL:**
+```bash
+export PYTHONPATH="."
+```
+
+### Step 4: Verify Installation
 
 ```bash
 # Test the CLI interface
-queuectl --help
+python -m cli.main --help
 
 # Run validation tests (recommended)
 python tests/test_validation.py
@@ -55,151 +100,112 @@ python demo.py
 
 **Expected output**: You should see the CLI help text and all tests should pass.
 
-## 📝 Job File Templates
-
-QueueCTL includes several JSON templates to get you started:
-
-- **`simple_job.json`** - Basic job with just a command
-- **`job_template.json`** - Full example with all options
-- **`python_job.json`** - Example Python script execution
-- **`test_job.json`** - Simple test example
-
-**Template Structure:**
-```json
-{
-  "id": "unique-job-id",           // Optional: Auto-generated if not provided
-  "command": "echo Hello World",   // Required: Command to execute
-  "max_retries": 3,               // Optional: Number of retry attempts (default: 3)
-  "timeout": 30,                  // Optional: Execution timeout in seconds (default: 300)
-  "priority": 5                   // Optional: Job priority, higher = processed first (default: 0)
-}
-```
-
 ## 🎯 Quick Start
+
+**Important**: Always set `PYTHONPATH=.` before running commands (see installation steps above).
 
 ### 1. Enqueue Your First Job
 
-**Option 1: Using JSON Files (Recommended for Windows)**
-```bash
-# Create a simple job file
-echo '{"command": "echo Hello World"}' > my_job.json
+**Windows PowerShell:**
+```powershell
+# Simple job
+python -m cli.main enqueue "{`"command`": `"echo Hello World`"}"
 
-# Enqueue the job using the file
-queuectl enqueue my_job.json
-# or
-queuectl enqueue --file my_job.json
-# or
-queuectl enqueue -f my_job.json
+# Job with custom settings  
+python -m cli.main enqueue "{`"id`": `"my-job-1`", `"command`": `"timeout 5`", `"max_retries`": 5}"
 ```
 
-**Option 2: Direct JSON (Linux/Mac/WSL)**
+**Linux/Mac/WSL:**
 ```bash
 # Simple job
-queuectl enqueue '{"command": "echo Hello World"}'
+python -m cli.main enqueue '{"command": "echo Hello World"}'
 
 # Job with custom settings
-queuectl enqueue '{"id": "my-job-1", "command": "sleep 5", "max_retries": 5, "timeout": 30}'
-```
-
-**Option 3: PowerShell JSON (Advanced)**
-```powershell
-# For PowerShell users who prefer inline JSON (requires careful escaping)
-queuectl enqueue "{`"command`": `"echo Hello World`"}"
+python -m cli.main enqueue '{"id": "my-job-1", "command": "sleep 5", "max_retries": 5, "timeout": 30}'
 ```
 
 ### 2. Start Workers
 
 ```bash
 # Start a single worker
-queuectl worker start
+python -m cli.main worker start
 
 # Start multiple workers
-queuectl worker start --count 3
+python -m cli.main worker start --count 3
 ```
 
 ### 3. Monitor Status
 
 ```bash
 # Overall system status
-queuectl status
+python -m cli.main status
 
 # List jobs
-queuectl list
+python -m cli.main list
 
 # List only pending jobs
-queuectl list --state pending
+python -m cli.main list --state pending
 ```
 
 ### 4. Manage Dead Letter Queue
 
 ```bash
 # List failed jobs
-queuectl dlq list
+python -m cli.main dlq list
 
 # Retry a specific job
-queuectl dlq retry job-id-here
+python -m cli.main dlq retry job-id-here
 
 # Retry all dead jobs
-queuectl dlq retry
+python -m cli.main dlq retry
 ```
 
 ## 📖 Usage Guide
+
+**Remember**: All commands require `PYTHONPATH=.` to be set in your environment.
 
 ### Job Management
 
 #### Enqueue Jobs
 
-**Method 1: Using JSON Files (Recommended)**
+**Basic Examples:**
 ```bash
-# Create a job file (easiest method, avoids shell escaping issues)
-echo '{"command": "python script.py"}' > job.json
-queuectl enqueue job.json
+# Basic job
+python -m cli.main enqueue '{"command": "python script.py"}'
 
-# Using template files
-queuectl enqueue job_template.json
-queuectl enqueue --file my_job.json
-queuectl enqueue -f custom_job.json
-
-# Example job file contents:
-# {
-#   "id": "data-processing-job",
-#   "command": "python process_data.py --input data.csv",
-#   "max_retries": 3,
-#   "timeout": 600,
-#   "priority": 10
-# }
-```
-
-**Method 2: Direct JSON String**
-```bash
-# Basic job (Linux/Mac/WSL)
-queuectl enqueue '{"command": "python script.py"}'
+# Job with full options
+python -m cli.main enqueue '{
+  "id": "data-processing-job",
+  "command": "python process_data.py --input data.csv",
+  "max_retries": 3,
+  "timeout": 600,
+  "priority": 10
+}'
 
 # Validate job without enqueuing
-queuectl enqueue --validate '{"command": "echo test"}'
+python -m cli.main enqueue '{"command": "echo test"}' --validate
 ```
 
-**Method 3: PowerShell JSON (Windows)**
+**PowerShell Note**: Use backtick escaping for JSON:
 ```powershell
-# Use backtick escaping for JSON in PowerShell
-queuectl enqueue "{`"command`": `"echo test`"}"
+python -m cli.main enqueue "{`"command`": `"echo test`"}"
 ```
 
 #### List and Monitor Jobs
 
 ```bash
 # List all jobs
-queuectl list
+python -m cli.main list
 
 # Filter by state
-queuectl list --state pending
-queuectl list --state completed
-queuectl list --state failed
+python -m cli.main list --state pending
+python -m cli.main list --state completed
+python -m cli.main list --state failed
 # Limit results
-queuectl list --limit 10
+python -m cli.main list --limit 10
 
 # Detailed view
-queuectl list --verbose
+python -m cli.main list --verbose
 ```
 
 ### Worker Management
@@ -208,42 +214,47 @@ queuectl list --verbose
 
 ```bash
 # Start single worker in background
-queuectl worker start
+python -m cli.main worker start
 
 # Start multiple workers
-queuectl worker start --count 5
+python -m cli.main worker start --count 5
 
 # Start worker in foreground (for debugging)
-queuectl worker start --no-detach
+python -m cli.main worker start --no-detach
 ```
 
 #### Stop Workers
 
 ```bash
 # Graceful shutdown (wait for current jobs)
-queuectl worker stop
+python -m cli.main worker stop
 
 # Force stop
-queuectl worker stop --force
+python -m cli.main worker stop --force
 
 # Custom timeout
-queuectl worker stop --timeout 60
+python -m cli.main worker stop --timeout 60
 ```
 
 #### Monitor Workers
 
 ```bash
 # Worker status
-queuectl worker status
+python -m cli.main worker status
 
 # Overall system status
-queuectl status
+python -m cli.main status
 
 # Force stop
-queuectl worker stop --force
+python -m cli.main worker stop --force
 
 # Custom timeout
-queuectl worker stop --timeout 60
+python -m cli.main worker stop --timeout 60
+```
+
+#### Monitor Workers
+
+```bash
 ```
 
 ### Dead Letter Queue (DLQ)
@@ -252,39 +263,39 @@ queuectl worker stop --timeout 60
 
 ```bash
 # List all dead jobs
-queuectl dlq list
+python -m cli.main dlq list
 
 # Detailed view with error analysis
-queuectl dlq list --verbose
+python -m cli.main dlq list --verbose
 
 # Show statistics
-queuectl dlq stats
+python -m cli.main dlq stats
 ```
 
 #### Retry Failed Jobs
 
 ```bash
 # Retry specific job
-queuectl dlq retry job-id-here
+python -m cli.main dlq retry job-id-here
 
 # Retry all dead jobs
-queuectl dlq retry
+python -m cli.main dlq retry
 
 # Retry without resetting attempt count
-queuectl dlq retry job-id-here --keep-attempts
+python -m cli.main dlq retry job-id-here --keep-attempts
 ```
 
 #### Remove Dead Jobs
 
 ```bash
 # Remove specific job
-queuectl dlq remove job-id-here
+python -m cli.main dlq remove job-id-here
 
 # Remove all dead jobs (with confirmation)
-queuectl dlq remove
+python -m cli.main dlq remove
 
 # Skip confirmation
-queuectl dlq remove --yes
+python -m cli.main dlq remove --yes
 
 ```
 
@@ -294,27 +305,34 @@ queuectl dlq remove --yes
 
 ```bash
 # Show all settings
-queuectl config show
+python -m cli.main config show
 ```
 
 #### Update Settings
 
 ```bash
 # Set retry limit
-queuectl config set max_retries 5
+python -m cli.main config set max_retries 5
 
 # Set backoff multiplier
-queuectl config set backoff_base 3.0
+python -m cli.main config set backoff_base 3.0
 
 # Set worker timeout
-queuectl config set worker_timeout 600
+python -m cli.main config set worker_timeout 600
 ```
 
 #### Reset Configuration
 
 ```bash
 # Reset to defaults
-queuectl config reset --yes
+python -m cli.main config reset --yes
+```
+
+#### Reset Configuration
+
+```bash
+# Reset to defaults
+python -m cli.main config reset --yes
 ```
 
 ## 🏗️ Architecture Overview
@@ -386,7 +404,7 @@ queuectl config reset --yes
 ## 🧪 Testing
 
 ### Prerequisites
-Make sure you have completed the installation steps with `pip install -e .`.
+Make sure you have completed the installation steps and set `PYTHONPATH=.` in your environment.
 
 ### Run Validation Tests
 
@@ -407,37 +425,33 @@ python tests/test_dlq.py
 #### Test Basic Functionality
 
 ```bash
-# Method 1: Using JSON files (recommended)
-echo '{"command": "echo Testing QueueCTL"}' > test_job.json
-queuectl enqueue test_job.json
-
-# Method 2: Direct JSON (Linux/Mac)
-queuectl enqueue '{"command": "echo Testing QueueCTL"}'
+# 1. Enqueue a simple job
+python -m cli.main enqueue '{"command": "echo Testing QueueCTL"}'
 
 # 2. Start a worker
-queuectl worker start
+python -m cli.main worker start
 
 # 3. Check status
-queuectl status
+python -m cli.main status
 
 # 4. List completed jobs
-queuectl list --state completed
+python -m cli.main list --state completed
 ```
 
 #### Test Retry Logic
 
 ```bash
 # 1. Enqueue a failing job
-queuectl enqueue '{"command": "nonexistent-command", "max_retries": 2}'
+python -m cli.main enqueue '{"command": "nonexistent-command", "max_retries": 2}'
 
 # 2. Start worker
-queuectl worker start
+python -m cli.main worker start
 
 # 3. Watch job fail and retry
-queuectl list --state failed
+python -m cli.main list --state failed
 
 # 4. Check DLQ after max retries
-queuectl dlq list
+python -m cli.main dlq list
 ```
 
 #### Test Multi-Worker
@@ -445,14 +459,14 @@ queuectl dlq list
 ```bash
 # 1. Enqueue multiple jobs
 for i in {1..5}; do
-  queuectl enqueue "{\"command\": \"sleep $i\"}"
+  python -m cli.main enqueue "{\"command\": \"sleep $i\"}"
 done
 
 # 2. Start multiple workers
-queuectl worker start --count 3
+python -m cli.main worker start --count 3
 
 # 3. Watch parallel processing
-queuectl status
+python -m cli.main status
 ```
 
 ### Expected Test Results
@@ -473,22 +487,22 @@ queuectl status
 
 ```bash
 # Check if workers are already running
-queuectl worker status
+python -m cli.main worker status
 
 # Stop existing workers and restart
-queuectl worker stop
-queuectl worker start
+python -m cli.main worker stop
+python -m cli.main worker start
 ```
 
 #### Jobs Stuck in Processing
 
 ```bash
 # Check for stale locks
-queuectl status
+python -m cli.main status
 
 # Restart workers to clear stale locks
-queuectl worker stop
-queuectl worker start
+python -m cli.main worker stop
+python -m cli.main worker start
 ```
 
 #### Storage Issues
@@ -501,36 +515,37 @@ ls -la ~/.queuectl/
 rm -rf ~/.queuectl/
 ```
 
-#### Installation Issues
+#### Module Import Errors
 
-If you encounter import errors after installation:
+If you encounter `ModuleNotFoundError: No module named 'queue'`, ensure:
 
-1. **Ensure the package is properly installed:**
+1. **PYTHONPATH is set correctly:**
    ```bash
-   pip list | grep queuectl
-   # Should show: queuectl 1.0.0
+   # Linux/macOS
+   export PYTHONPATH=.
+   
+   # Windows PowerShell
+   $env:PYTHONPATH="."
    ```
 
-2. **Reinstall if necessary:**
+2. **You're running from the project root directory:**
    ```bash
-   pip uninstall queuectl
-   pip install -e .
+   cd QueueCTL  # Make sure you're in the right directory
+   python -m cli.main --help
    ```
 
-3. **Verify the command is available:**
-   ```bash
-   queuectl --help
-   ```
+3. **Not using pip install (due to naming conflict):**
+   - Do NOT run `pip install -e .`
+   - Use direct execution with PYTHONPATH instead
 
 ### Debug Mode
 
 ```bash
 # Enable verbose output
+export PYTHONPATH=.
 python -c "
 import logging
 logging.basicConfig(level=logging.DEBUG)
-import sys
-sys.path.insert(0, '.')
 from cli.main import main
 main()
 " status
@@ -573,7 +588,7 @@ main()
 
 ```python
 # Custom job with Python code
-queuectl enqueue '{
+python -m cli.main enqueue '{
   "command": "python -c \"import time; print(\\\"Processing...\\\"); time.sleep(2); print(\\\"Done!\\\")\"",
   "timeout": 10
 }'
@@ -584,21 +599,21 @@ queuectl enqueue '{
 ```bash
 # Enqueue multiple jobs from file
 cat jobs.txt | while read cmd; do
-  queuectl enqueue "{\"command\": \"$cmd\"}"
+  python -m cli.main enqueue "{\"command\": \"$cmd\"}"
 done
 
 # Bulk retry all DLQ jobs
-queuectl dlq retry
+python -m cli.main dlq retry
 ```
 
 ### Monitoring & Analytics
 
 ```bash
 # Job statistics
-queuectl dlq stats
+python -m cli.main dlq stats
 
 # System overview
-queuectl status
+python -m cli.main status
 
 # Export job data
 cat ~/.queuectl/jobs.json | jq '.[] | select(.state == "completed")'

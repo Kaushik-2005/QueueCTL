@@ -1,0 +1,6 @@
+{
+  "command": "python -c \"import time; print('Processing...'); time.sleep(2); print('Done!')\"",
+  "id": "python-job",
+  "max_retries": 2,
+  "timeout": 10
+}

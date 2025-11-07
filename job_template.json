@@ -1,0 +1,7 @@
+{
+  "command": "echo Hello from QueueCTL!",
+  "id": "example-job-1",
+  "max_retries": 3,
+  "timeout": 30,
+  "priority": 0
+}
