@@ -17,7 +17,19 @@ A production-quality CLI-based background job queue system that supports multipl
 - **Job Locking**: Prevents race conditions between workers
 - **Graceful Shutdown**: Workers finish current jobs before stopping
 
-## 📦 Installation & Setup
+## � Screenshots & Results
+
+For visual demonstrations of QueueCTL in action, check out the `images/` folder which contains screenshots showing:
+
+- Job listing and status displays
+- Worker management commands
+- Dead Letter Queue functionality
+- System configuration and validation tests
+- Complete CLI command examples
+
+See [QueueCTL_Results.md](QueueCTL_Results.md) for a comprehensive overview with embedded screenshots.
+
+## �📦 Installation & Setup
 
 ### Prerequisites
 
